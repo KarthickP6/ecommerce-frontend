@@ -1,0 +1,193 @@
+You are a senior enterprise-level full stack architect.
+
+Build a production-ready E-commerce Web Application.
+
+========================================
+TECH STACK
+========================================
+
+Backend:
+- Java 17+
+- Spring Boot 3.x
+- Spring Security 6
+- JWT (Access + Refresh Token)
+- Spring Data JPA
+- Hibernate
+- PostgreSQL
+- Lombok
+- MapStruct (Entity ↔ DTO mapping)
+- Flyway (DB migration)
+- Swagger / OpenAPI
+- SLF4J Logging
+- Bean Validation
+- Global Exception Handling
+- Standard API Response Wrapper
+- Pagination & Sorting
+- Filtering (Specification API)
+- Role Based Access Control (USER, ADMIN)
+- Docker support
+
+Architecture:
+- Clean Architecture
+- Layered structure
+- Controller → Service → Repository
+- DTO pattern (Never expose entity directly)
+- Utility package
+- Constants package
+- Config package
+- Security package
+- Exception package
+
+========================================
+PROJECT STRUCTURE (MUST FOLLOW)
+========================================
+
+com.ecommerce
+ ├── config
+ ├── security
+ ├── controller
+ ├── service
+ │    ├── impl
+ ├── repository
+ ├── entity
+ ├── dto
+ │    ├── request
+ │    ├── response
+ ├── mapper
+ ├── exception
+ ├── util
+ ├── constant
+
+========================================
+DATABASE TABLES
+========================================
+
+users
+roles
+user_roles
+products
+categories
+product_images
+carts
+cart_items
+orders
+order_items
+payments
+reviews
+addresses
+wishlist
+
+Use:
+- UUID as primary key
+- created_at, updated_at fields
+- soft delete where necessary
+- indexes on foreign keys
+- proper constraints
+
+========================================
+SECURITY REQUIREMENTS
+========================================
+
+- JWT Access Token (15 min)
+- Refresh Token (7 days)
+- BCrypt password encoding
+- Role-based method security
+- @PreAuthorize annotations
+- Secure admin endpoints
+- CORS configuration
+- Custom authentication entry point
+- Custom access denied handler
+
+========================================
+STANDARD API RESPONSE FORMAT
+========================================
+
+{
+  "success": true,
+  "message": "Product created successfully",
+  "data": {},
+  "timestamp": ""
+}
+
+========================================
+FEATURE MODULES
+========================================
+
+AUTH MODULE:
+- Register
+- Login
+- Refresh token
+- Logout
+- Password encryption
+- Role assignment
+
+USER MODULE:
+- Profile management
+- Address CRUD
+- Order history
+- Wishlist
+- Reviews
+
+PRODUCT MODULE:
+- Product CRUD (Admin)
+- Category CRUD (Admin)
+- Product search
+- Pagination
+- Filtering (price range, category, rating)
+
+CART MODULE:
+- Add to cart
+- Update quantity
+- Remove item
+- Clear cart
+
+ORDER MODULE:
+- Checkout
+- Create order
+- Reduce stock
+- Order status update
+- Payment integration structure
+
+ADMIN MODULE:
+- Dashboard statistics API
+- User management
+- Block/unblock user
+- Manage orders
+- View payments
+- Sales analytics endpoint
+
+========================================
+IMPLEMENTATION RULES
+========================================
+
+1. Generate backend only first.
+2. Show full folder structure before writing code.
+3. Generate base configuration first.
+4. Then implement modules in this order:
+
+   Step 1: Base configuration (application.yml, security config, Swagger, Flyway)
+   Step 2: Common utilities (ApiResponse, exceptions)
+   Step 3: Auth module
+   Step 4: User module
+   Step 5: Product & Category module
+   Step 6: Cart module
+   Step 7: Order module
+   Step 8: Admin module
+
+5. Do NOT overwrite existing files unless necessary.
+6. Follow SOLID principles.
+7. Avoid circular dependencies.
+8. Use constructor injection only.
+9. Validate all request DTOs.
+10. Include sample JSON request/response.
+11. Ensure code compiles logically.
+
+========================================
+START NOW
+========================================
+
+Start with:
+- Maven dependencies
+- application.yml
+- Folder structure
+- Base configuration

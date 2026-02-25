@@ -1,0 +1,202 @@
+You are a senior frontend architect.
+
+Build a production-ready E-commerce Frontend Application.
+
+========================================
+TECH STACK
+========================================
+
+- React 18
+- Vite
+- React Router v6
+- Axios
+- Redux Toolkit
+- Tailwind CSS
+- Formik
+- Yup validation
+- JWT Authentication
+- Role-based routing
+- Toast notifications
+- Environment variables
+- Clean folder structure
+
+========================================
+ARCHITECTURE REQUIREMENTS
+========================================
+
+- Modular folder structure
+- Feature-based structure
+- Reusable components
+- Centralized API service
+- Axios interceptor for JWT
+- Refresh token logic
+- Protected routes
+- Admin protected routes
+- Proper loading & error states
+- Form validation
+- Pagination UI
+- Search & filter UI
+- Clean responsive design
+- Production ready code
+
+========================================
+PROJECT STRUCTURE
+========================================
+
+src/
+ ├── app/
+ │    ├── store.js
+ │    ├── rootReducer.js
+ ├── api/
+ │    ├── axiosInstance.js
+ │    ├── authApi.js
+ │    ├── productApi.js
+ │    ├── cartApi.js
+ │    ├── orderApi.js
+ ├── components/
+ │    ├── common/
+ │    ├── layout/
+ │    ├── ui/
+ ├── features/
+ │    ├── auth/
+ │    ├── user/
+ │    ├── product/
+ │    ├── cart/
+ │    ├── order/
+ │    ├── admin/
+ ├── pages/
+ │    ├── public/
+ │    ├── user/
+ │    ├── admin/
+ ├── routes/
+ │    ├── AppRoutes.jsx
+ │    ├── ProtectedRoute.jsx
+ │    ├── AdminRoute.jsx
+ ├── hooks/
+ ├── utils/
+ ├── constants/
+ ├── layouts/
+ ├── assets/
+ ├── App.jsx
+ ├── main.jsx
+
+========================================
+AUTH FLOW REQUIREMENTS
+========================================
+
+- Store access token in memory
+- Store refresh token securely
+- Axios interceptor:
+   - Attach JWT to headers
+   - Auto refresh token on 401
+- Logout clears store
+- Role stored in Redux
+- Route protection using role
+
+========================================
+SCREENS TO IMPLEMENT
+========================================
+
+PUBLIC PAGES:
+- Landing Page
+- Home Page
+- Product Listing
+- Product Details
+- Category Page
+- Search Page
+- Login
+- Register
+- Forgot Password
+- Reset Password
+
+USER PAGES:
+- User Dashboard
+- Profile Page
+- Address CRUD
+- Cart Page
+- Checkout Page
+- Order Success
+- Order History
+- Order Details
+- Wishlist
+- Add Review
+
+ADMIN PAGES:
+- Admin Dashboard
+- Manage Users
+- Manage Products
+- Add/Edit Product
+- Manage Categories
+- Manage Orders
+- Update Order Status
+- View Payments
+- Sales Analytics
+
+========================================
+REDUX STRUCTURE
+========================================
+
+Slices:
+
+- authSlice
+- userSlice
+- productSlice
+- cartSlice
+- orderSlice
+- adminSlice
+
+Each slice must contain:
+- initialState
+- asyncThunk for API
+- loading state
+- error state
+
+========================================
+UI REQUIREMENTS
+========================================
+
+- Tailwind responsive design
+- Loading spinner component
+- Error component
+- Empty state component
+- Toast notifications
+- Pagination component
+- Search + Filter sidebar
+- Navbar (dynamic based on role)
+- Footer
+- Sidebar for admin
+
+========================================
+IMPLEMENTATION RULES
+========================================
+
+1. Generate project structure first.
+2. Setup routing first.
+3. Setup Redux store.
+4. Setup Axios instance.
+5. Implement authentication flow.
+6. Then implement product listing.
+7. Then cart logic.
+8. Then order flow.
+9. Then admin panel.
+
+10. Do NOT overwrite unrelated files.
+11. Follow best practices.
+12. Use functional components only.
+13. Use React hooks.
+14. Avoid prop drilling (use Redux properly).
+15. Keep components reusable.
+16. Ensure code compiles logically.
+17. Match backend API endpoints.
+18. Include sample API integration.
+
+========================================
+START NOW
+========================================
+
+Start with:
+- Vite project setup
+- Folder structure
+- Routing setup
+- Redux store setup
+- Axios configuration
