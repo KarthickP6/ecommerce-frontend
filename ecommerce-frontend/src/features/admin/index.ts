@@ -1,2 +1,3 @@
-// Admin feature exports
+export * from './adminSlice';
+export { default as adminReducer } from './adminSlice';
 
