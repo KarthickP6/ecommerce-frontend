@@ -3,11 +3,11 @@ import ProtectedRoute from './ProtectedRoute';
 import AdminRoute from './AdminRoute';
 import { LoginPage } from '@/pages/auth/LoginPage';
 import { RegisterPage } from '@/pages/auth/RegisterPage';
+import ProductListPage from '@/pages/product/ProductListPage';
+import ProductDetailsPage from '@/pages/product/ProductDetailsPage';
 
 // Placeholder components
 const HomePage = () => <div className="p-8"><h1>Home Page</h1></div>;
-const ProductListPage = () => <div className="p-8"><h1>Product List</h1></div>;
-const ProductDetailsPage = () => <div className="p-8"><h1>Product Details</h1></div>;
 const CategoryPage = () => <div className="p-8"><h1>Category Page</h1></div>;
 const SearchPage = () => <div className="p-8"><h1>Search Page</h1></div>;
 const ForgotPasswordPage = () => <div className="p-8"><h1>Forgot Password</h1></div>;
