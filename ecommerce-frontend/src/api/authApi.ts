@@ -8,6 +8,7 @@ import axiosInstance from './axiosInstance';
 const AUTH_ENDPOINTS = {
   LOGIN: '/auth/login',
   REGISTER: '/auth/register',
+  GOOGLE: '/auth/google',
   LOGOUT: '/auth/logout',
   REFRESH: '/auth/refresh-token',
   FORGOT_PASSWORD: '/auth/forgot-password',
@@ -92,7 +93,23 @@ export const refreshToken = async (refreshToken: string) => {
 };
 
 /**
- * Request password reset
+ * Authenticate with Google OAuth token
+ * @param idToken - Google ID token from frontend
+ * @returns Promise with user data and tokens
+ */
+export const googleAuthenticate = async (idToken: string) => {
+  try {
+    const response = await axiosInstance.post(AUTH_ENDPOINTS.GOOGLE, {
+      idToken,
+    });
+    return response;
+  } catch (error) {
+    throw error;
+  }
+};
+
+/**
+ * Forgot password
  * @param email - User email
  * @returns Promise
  */
@@ -147,6 +164,7 @@ export const verifyToken = async () => {
 export default {
   loginUser,
   registerUser,
+  googleAuthenticate,
   logoutUser,
   refreshToken,
   forgotPassword,

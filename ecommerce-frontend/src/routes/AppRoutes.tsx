@@ -1,10 +1,26 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+import type { RootState } from '@/app/store';
 import ProtectedRoute from './ProtectedRoute';
 import AdminRoute from './AdminRoute';
 import { LoginPage } from '@/pages/auth/LoginPage';
 import { RegisterPage } from '@/pages/auth/RegisterPage';
 import ProductListPage from '@/pages/product/ProductListPage';
 import ProductDetailsPage from '@/pages/product/ProductDetailsPage';
+import CartPage from '@/pages/product/CartPage';
+import CheckoutPage from '@/pages/order/CheckoutPage';
+import OrderSuccessPage from '@/pages/order/OrderSuccessPage';
+import OrderHistoryPage from '@/pages/order/OrderHistoryPage';
+import OrderDetailsPage from '@/pages/order/OrderDetailsPage';
+import AdminDashboardPage from '@/pages/admin/AdminDashboardPage';
+import ManageProductsPage from '@/pages/admin/ManageProductsPage';
+import ManageUsersPage from '@/pages/admin/ManageUsersPage';
+import ManageCategoriesPage from '@/pages/admin/ManageCategoriesPage';
+import ManageOrdersPage from '@/pages/admin/ManageOrdersPage';
+import ViewPaymentsPage from '@/pages/admin/ViewPaymentsPage';
+import SalesAnalyticsPage from '@/pages/admin/SalesAnalyticsPage';
+import AddEditProductPage from '@/pages/admin/AddEditProductPage';
+import UserDashboardPage from '@/pages/UserDashboardPage';
 
 // Placeholder components
 const HomePage = () => <div className="p-8"><h1>Home Page</h1></div>;
@@ -14,33 +30,31 @@ const ForgotPasswordPage = () => <div className="p-8"><h1>Forgot Password</h1></
 const ResetPasswordPage = () => <div className="p-8"><h1>Reset Password</h1></div>;
 
 // User protected pages
-const UserDashboardPage = () => <div className="p-8"><h1>User Dashboard</h1></div>;
 const ProfilePage = () => <div className="p-8"><h1>User Profile</h1></div>;
 const AddressPage = () => <div className="p-8"><h1>Address Management</h1></div>;
-const CartPage = () => <div className="p-8"><h1>Shopping Cart</h1></div>;
-const CheckoutPage = () => <div className="p-8"><h1>Checkout</h1></div>;
-const OrderSuccessPage = () => <div className="p-8"><h1>Order Success</h1></div>;
-const OrderHistoryPage = () => <div className="p-8"><h1>Order History</h1></div>;
-const OrderDetailsPage = () => <div className="p-8"><h1>Order Details</h1></div>;
 const WishlistPage = () => <div className="p-8"><h1>Wishlist</h1></div>;
 const ReviewPage = () => <div className="p-8"><h1>Add Review</h1></div>;
 
-// Admin protected pages
-const AdminDashboardPage = () => <div className="p-8"><h1>Admin Dashboard</h1></div>;
-const ManageUsersPage = () => <div className="p-8"><h1>Manage Users</h1></div>;
-const ManageProductsPage = () => <div className="p-8"><h1>Manage Products</h1></div>;
-const AddEditProductPage = () => <div className="p-8"><h1>Add/Edit Product</h1></div>;
-const ManageCategoriesPage = () => <div className="p-8"><h1>Manage Categories</h1></div>;
-const ManageOrdersPage = () => <div className="p-8"><h1>Manage Orders</h1></div>;
+// Admin pages
 const UpdateOrderStatusPage = () => <div className="p-8"><h1>Update Order Status</h1></div>;
-const ViewPaymentsPage = () => <div className="p-8"><h1>View Payments</h1></div>;
-const SalesAnalyticsPage = () => <div className="p-8"><h1>Sales Analytics</h1></div>;
+
+/**
+ * RootRedirect Component
+ * Redirects unauthenticated users to login
+ * Redirects authenticated users to dashboard
+ */
+const RootRedirect = () => {
+  const { isAuthenticated } = useSelector((state: RootState) => state.auth);
+  return isAuthenticated ? <Navigate to="/dashboard" replace /> : <Navigate to="/login" replace />;
+};
 
 const AppRoutes = () => {
   return (
     <Routes>
+      {/* Root redirect - authenticates users are sent to /dashboard, others to /login */}
+      <Route path="/" element={<RootRedirect />} />
+
       {/* Public Routes */}
-      <Route path="/" element={<HomePage />} />
       <Route path="/products" element={<ProductListPage />} />
       <Route path="/products/:id" element={<ProductDetailsPage />} />
       <Route path="/category/:categoryId" element={<CategoryPage />} />
@@ -80,7 +94,7 @@ const AppRoutes = () => {
         <Route path="/admin/analytics" element={<SalesAnalyticsPage />} />
       </Route>
 
-      {/* Catch-all - Redirect to home */}
+      {/* Catch-all - Redirect to root (which will handle auth) */}
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );

@@ -1,5 +1,48 @@
 import { createSlice } from '@reduxjs/toolkit';
 import type { PayloadAction } from '@reduxjs/toolkit';
+import * as productApi from '@/api/productApi';
+import { createAsyncThunk } from '@reduxjs/toolkit';
+
+export const getCategories = createAsyncThunk(
+  'product/getCategories',
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await productApi.getCategories();
+      return response.data;
+    } catch (err: any) {
+      return rejectWithValue(err.message || 'Failed to fetch categories');
+    }
+  }
+);
+
+export const getProducts = createAsyncThunk(
+  'product/getProducts',
+  async (params, { rejectWithValue }) => {
+    try {
+      const response = await productApi.getAllProducts(
+        params.page,
+        params.limit,
+        params.search,
+        params.category
+      );
+      return response.data;
+    } catch (err: any) {
+      return rejectWithValue(err.message || 'Failed to fetch products');
+    }
+  }
+);
+
+export const getProductById = createAsyncThunk(
+  'product/getProductById',
+  async (id, { rejectWithValue }) => {
+    try {
+      const response = await productApi.getProductById(id);
+      return response.data;
+    } catch (err: any) {
+      return rejectWithValue(err.message || 'Failed to fetch product');
+    }
+  }
+);
 
 export interface Product {
   id: string;
@@ -112,4 +155,3 @@ export const {
 } = productSlice.actions;
 
 export default productSlice.reducer;
-

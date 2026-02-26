@@ -1,17 +1,22 @@
 import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { getProducts, setPage, setSearch, setFilter, getCategories } from '@/features/product/productSlice';
-import type { RootState } from '@/app/store';
+import { getProducts, setPagination, setFilters, getCategories } from '@/features/product/productSlice';
+import type { RootState, AppDispatch } from '@/app/store';
 import Pagination from '@/components/common/Pagination';
 import SearchFilter from '@/components/common/SearchFilter';
 
 const ProductListPage = () => {
-  const dispatch = useDispatch();
-  const { products, loading, error, page, totalPages, search, filter, categories } = useSelector((state: RootState) => state.product);
+  const dispatch = useDispatch<AppDispatch>();
+  const { products, loading, error, pagination, filters, categories } = useSelector((state: RootState) => state.product);
 
   useEffect(() => {
-    dispatch(getProducts({ page, search, category: filter }));
-  }, [dispatch, page, search, filter]);
+    dispatch(getProducts({
+      page: pagination.page,
+      limit: pagination.limit,
+      search: filters.search,
+      category: filters.category
+    }));
+  }, [dispatch, pagination.page, pagination.limit, filters.search, filters.category]);
 
   useEffect(() => {
     dispatch(getCategories());
@@ -21,11 +26,11 @@ const ProductListPage = () => {
     <div className="container mx-auto p-4">
       <h1 className="text-2xl font-bold mb-4">Product Listing</h1>
       <SearchFilter
-        search={search}
-        filter={filter}
+        search={filters.search}
+        filter={filters.category}
         categories={categories}
-        onSearch={(val) => dispatch(setSearch(val))}
-        onFilter={(val) => dispatch(setFilter(val))}
+        onSearch={(val) => dispatch(setFilters({ search: val }))}
+        onFilter={(val) => dispatch(setFilters({ category: val }))}
       />
       {loading && <div>Loading...</div>}
       {error && <div className="text-red-500">{error}</div>}
@@ -41,9 +46,9 @@ const ProductListPage = () => {
         ))}
       </div>
       <Pagination
-        page={page}
-        totalPages={totalPages}
-        onPageChange={(p) => dispatch(setPage(p))}
+        page={pagination.page}
+        totalPages={Math.ceil(pagination.total / pagination.limit)}
+        onPageChange={(p) => dispatch(setPagination({ page: p }))}
       />
     </div>
   );

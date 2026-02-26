@@ -52,7 +52,14 @@ axiosInstance.interceptors.response.use(
   (response) => {
     // Successful response
     // Response structure: { data, status, statusText, headers, config }
-    return response.data || response;
+    // The backend wraps responses in ApiResponse, so return the full response
+    // including the nested data structure
+    console.log('axiosInstance - Response received:', {
+      status: response.status,
+      hasData: !!response.data,
+      dataKeys: response.data ? Object.keys(response.data) : [],
+    });
+    return response;
   },
   (error) => {
     // Handle response errors
