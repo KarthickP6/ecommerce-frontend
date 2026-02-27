@@ -6,6 +6,9 @@ on:
       - main
   workflow_dispatch:
 
+env:
+  DIST_PATH: ecommerce-frontend/dist
+
 jobs:
   build_and_deploy:
     name: Build and Deploy to Azure Storage Static Website
@@ -24,34 +27,102 @@ jobs:
 
       - name: Install dependencies
         working-directory: ecommerce-frontend
-        run: npm ci
+        run: |
+          npm ci
+          echo "✅ Dependencies installed successfully"
 
       - name: Build application
         working-directory: ecommerce-frontend
-        run: npm run build
+        run: |
+          npm run build
+          echo "✅ Build completed successfully"
         env:
           NODE_ENV: production
+
+      - name: Verify build output
+        run: |
+          if [ -d "${{ env.DIST_PATH }}" ]; then
+            echo "✅ Build directory exists"
+            echo "📦 Contents of dist folder:"
+            ls -lah ${{ env.DIST_PATH }} | head -20
+            echo ""
+            echo "📊 Total files: $(find ${{ env.DIST_PATH }} -type f | wc -l)"
+            echo "📊 Total size: $(du -sh ${{ env.DIST_PATH }} | cut -f1)"
+          else
+            echo "❌ Build directory not found at ${{ env.DIST_PATH }}"
+            exit 1
+          fi
 
       - name: Login to Azure
         uses: azure/login@v1
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
+      - name: Verify Azure Storage Account
+        run: |
+          az storage account show \
+            --name ${{ secrets.STORAGE_ACCOUNT_NAME }} \
+            --query "name" \
+            -o tsv
+          echo "✅ Storage account verified"
+
       - name: Deploy to Azure Storage Static Website
         run: |
+          echo "🚀 Starting deployment to Azure Storage Static Website..."
           az storage blob upload-batch \
             --account-name ${{ secrets.STORAGE_ACCOUNT_NAME }} \
-            --account-key ${{ secrets.STORAGE_ACCOUNT_KEY }} \
-            --source ecommerce-frontend/dist \
+            --account-key "${{ secrets.STORAGE_ACCOUNT_KEY }}" \
+            --source ${{ env.DIST_PATH }} \
             --destination '$web' \
-            --overwrite
+            --overwrite \
+            --verbose
+          echo "✅ Files uploaded successfully to Azure Storage"
+
+      - name: Get Static Website URL
+        id: get_url
+        run: |
+          STORAGE_URL=$(az storage account show \
+            --name ${{ secrets.STORAGE_ACCOUNT_NAME }} \
+            --query "primaryEndpoints.web" \
+            -o tsv)
+          echo "url=$STORAGE_URL" >> $GITHUB_OUTPUT
+          echo "✅ Static Website URL: $STORAGE_URL"
+
+      - name: Verify deployment
+        run: |
+          STORAGE_URL=$(az storage account show \
+            --name ${{ secrets.STORAGE_ACCOUNT_NAME }} \
+            --query "primaryEndpoints.web" \
+            -o tsv)
+          echo "🔍 Verifying deployment at: $STORAGE_URL"
+          echo "📊 Blob count in \$web container:"
+          az storage blob list \
+            --account-name ${{ secrets.STORAGE_ACCOUNT_NAME }} \
+            --account-key "${{ secrets.STORAGE_ACCOUNT_KEY }}" \
+            --container-name '$web' \
+            --query "length(@)" \
+            -o tsv
+          echo "✅ Deployment verified"
 
       - name: Purge CDN cache (Optional)
-        if: ${{ secrets.CDN_PROFILE_NAME != '' }}
+        if: ${{ secrets.CDN_PROFILE_NAME != '' && secrets.CDN_ENDPOINT_NAME != '' }}
         run: |
+          echo "🧹 Purging CDN cache..."
           az cdn endpoint purge \
             --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} \
             --profile-name ${{ secrets.CDN_PROFILE_NAME }} \
             --name ${{ secrets.CDN_ENDPOINT_NAME }} \
             --content-paths "/*"
+          echo "✅ CDN cache purged"
+
+      - name: Deployment Summary
+        run: |
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "✅ DEPLOYMENT COMPLETED SUCCESSFULLY"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "📍 Storage Account: ${{ secrets.STORAGE_ACCOUNT_NAME }}"
+          echo "📦 Deployment Path: \$web"
+          echo "🌐 Static Website URL: ${{ steps.get_url.outputs.url }}"
+          echo "📅 Deployment Time: $(date)"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
