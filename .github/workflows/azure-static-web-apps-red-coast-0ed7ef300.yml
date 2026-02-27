@@ -40,7 +40,5 @@ jobs:
 
       - name: Show Website URL
         run: |
-          az storage account show \
-            --name ${{ secrets.STORAGE_ACCOUNT_NAME }} \
-            --query "primaryEndpoints.web" \
-            -o tsv
+          echo "Website URL:"
+          echo "https://${{ secrets.STORAGE_ACCOUNT_NAME }}.z13.web.core.windows.net/"
