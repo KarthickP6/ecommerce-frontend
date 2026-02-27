@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom';
+import { formatPrice } from '@/utils/formatPrice';
 
 /**
  * Enhanced Home/Landing Page with Beautiful UI
@@ -181,8 +182,8 @@ const HomePageNew = () => {
                     <span className="text-sm text-gray-600">(128)</span>
                   </div>
                   <div className="flex items-baseline gap-2">
-                    <span className="text-2xl font-bold text-gray-900">$199.99</span>
-                    <span className="text-gray-500 line-through">$299.99</span>
+                    <span className="text-2xl font-bold text-gray-900">{formatPrice(199.99)}</span>
+                    <span className="text-gray-500 line-through">{formatPrice(299.99)}</span>
                   </div>
                 </div>
               </div>

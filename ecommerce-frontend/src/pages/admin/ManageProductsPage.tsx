@@ -9,6 +9,7 @@ import {
   clearError,
 } from '@/features/admin/adminSlice';
 import type { RootState } from '@/app/store';
+import { formatPrice } from '@/utils/formatPrice';
 
 interface Product {
   id: number;
@@ -45,10 +46,13 @@ export default function ManageProductsPage() {
   const [selectedProducts, setSelectedProducts] = useState<Set<number>>(new Set());
   const itemsPerPage = 10;
 
-  // Load products from backend on mount
+  // Load products from backend on mount and when currentPage changes
   useEffect(() => {
-    dispatch(fetchProducts({ page: currentPage, limit: itemsPerPage }) as any);
+    // Ensure page is at least 1 (never send 0 to backend)
+    const pageToSend = Math.max(1, currentPage);
+    dispatch(fetchProducts({ page: pageToSend, limit: itemsPerPage }) as any);
   }, [dispatch, currentPage]);
+
 
   // Clear error on unmount
   useEffect(() => {
@@ -60,18 +64,18 @@ export default function ManageProductsPage() {
   }, [dispatch, error]);
 
   // Filter products by search term
-  const filteredProducts = products.data.filter((p) => {
-    const matchesSearch =
-      p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      p.description?.toLowerCase().includes(searchTerm.toLowerCase());
-    return matchesSearch;
-  });
+  const filteredProducts = (products.data && Array.isArray(products.data)) ?
+    products.data.filter((p) => {
+      const matchesSearch =
+        p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        p.description?.toLowerCase().includes(searchTerm.toLowerCase());
+      return matchesSearch;
+    }) : [];
 
-  const paginatedProducts = filteredProducts.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
-  const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
+  // Use backend pagination data directly instead of client-side slicing
+  // products.data comes directly from backend with correct pagination
+  const paginatedProducts = products.data && Array.isArray(products.data) ? products.data : [];
+  const totalPages = products.total ? Math.ceil(products.total / itemsPerPage) : 0;
 
   const handleSelectProduct = (id: number) => {
     const newSelected = new Set(selectedProducts);
@@ -228,7 +232,7 @@ export default function ManageProductsPage() {
                         {product.category?.name || 'N/A'}
                       </td>
                       <td className="px-6 py-4 text-sm font-semibold text-gray-900">
-                        ${product.price.toFixed(2)}
+                        {formatPrice(product.price)}
                       </td>
                       <td className="px-6 py-4">
                         <span
@@ -288,7 +292,7 @@ export default function ManageProductsPage() {
                 </button>
 
                 {Array.from(
-                  { length: Math.ceil(products.total / itemsPerPage) },
+                  { length: totalPages },
                   (_, i) => i + 1
                 )
                   .slice(Math.max(0, currentPage - 3), currentPage + 2)
@@ -309,10 +313,10 @@ export default function ManageProductsPage() {
                 <button
                   onClick={() =>
                     setCurrentPage(
-                      Math.min(Math.ceil(products.total / itemsPerPage), currentPage + 1)
+                      Math.min(totalPages, currentPage + 1)
                     )
                   }
-                  disabled={currentPage === Math.ceil(products.total / itemsPerPage)}
+                  disabled={currentPage === totalPages}
                   className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Next
@@ -325,4 +329,3 @@ export default function ManageProductsPage() {
     </AdminLayout>
   );
 }
-

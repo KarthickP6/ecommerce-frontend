@@ -1,0 +1,56 @@
+version: '3.9'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: furniture-db
+    environment:
+      POSTGRES_DB: furniture
+      POSTGRES_USER: furniture_user
+      POSTGRES_PASSWORD: furniture_secure_password_123
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U furniture_user -d furniture" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - furniture-network
+
+  furniture-app:
+    build:
+      context: ./ecommerce-backend/furniture
+      dockerfile: Dockerfile
+    container_name: furniture-app
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/furniture
+      SPRING_DATASOURCE_USERNAME: furniture_user
+      SPRING_DATASOURCE_PASSWORD: furniture_secure_password_123
+      SPRING_JPA_HIBERNATE_DDL_AUTO: validate
+      JAVA_OPTS: -XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0
+    ports:
+      - "8080:8080"
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8080/api/categories" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - furniture-network
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  furniture-network:
+    driver: bridge
+

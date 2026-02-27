@@ -215,8 +215,10 @@ const adminSlice = createSlice({
         state.error = null;
       })
       .addCase(fetchUsers.fulfilled, (state, action) => {
-        state.users.data = action.payload.content || [];
-        state.users.total = action.payload.totalElements || 0;
+        // Backend returns: { success, data: { content, totalElements }, timestamp }
+        const payload = action.payload;
+        state.users.data = payload.data?.content || [];
+        state.users.total = payload.data?.totalElements || 0;
         state.loading = false;
       })
       .addCase(fetchUsers.rejected, (state, action) => {
@@ -240,8 +242,10 @@ const adminSlice = createSlice({
         state.error = null;
       })
       .addCase(fetchProducts.fulfilled, (state, action) => {
-        state.products.data = action.payload.content || [];
-        state.products.total = action.payload.totalElements || 0;
+        // Backend returns: { success, data: { content, totalElements }, timestamp }
+        const payload = action.payload;
+        state.products.data = payload.data?.content || [];
+        state.products.total = payload.data?.totalElements || 0;
         state.loading = false;
       })
       .addCase(fetchProducts.rejected, (state, action) => {
@@ -292,8 +296,10 @@ const adminSlice = createSlice({
         state.error = null;
       })
       .addCase(fetchOrders.fulfilled, (state, action) => {
-        state.orders.data = action.payload.content || [];
-        state.orders.total = action.payload.totalElements || 0;
+        // Backend returns: { success, data: { content, totalElements }, timestamp }
+        const payload = action.payload;
+        state.orders.data = payload.data?.content || [];
+        state.orders.total = payload.data?.totalElements || 0;
         state.loading = false;
       })
       .addCase(fetchOrders.rejected, (state, action) => {

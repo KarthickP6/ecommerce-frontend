@@ -26,7 +26,7 @@ const ADMIN_ENDPOINTS = {
 export const getAdminDashboard = async () => {
   try {
     const response = await axiosInstance.get(ADMIN_ENDPOINTS.GET_DASHBOARD);
-    return response;
+    return response.data;
   } catch (error) {
     throw error;
   }
@@ -57,7 +57,7 @@ export const getAdminUsers = async (
     const response = await axiosInstance.get(
       `${ADMIN_ENDPOINTS.GET_USERS}?${params}`
     );
-    return response;
+    return response.data;
   } catch (error) {
     throw error;
   }
@@ -117,7 +117,7 @@ export const getAdminOrders = async (
     const response = await axiosInstance.get(
       `${ADMIN_ENDPOINTS.GET_ORDERS}?${params}`
     );
-    return response;
+    return response.data;
   } catch (error) {
     throw error;
   }
@@ -306,3 +306,6 @@ export default {
   getSalesAnalytics,
 };
 
+// Compatibility aliases expected by adminSlice / other callers
+export const getDashboardStats = getAdminDashboard;
+export const getAllUsers = getAdminUsers;

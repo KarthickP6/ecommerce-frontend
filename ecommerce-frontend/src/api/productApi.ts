@@ -52,7 +52,7 @@ export const getAllProducts = async (
     const response = await axiosInstance.get(
       `${PRODUCT_ENDPOINTS.GET_ALL}?${params}`
     );
-    return response;
+    return response.data;
   } catch (error) {
     throw error;
   }
@@ -68,7 +68,7 @@ export const getProductById = async (id: string) => {
     const response = await axiosInstance.get(
       PRODUCT_ENDPOINTS.GET_ONE.replace(':id', id)
     );
-    return response;
+    return response.data;
   } catch (error) {
     throw error;
   }
@@ -90,7 +90,7 @@ export const searchProducts = async (query: string, filters?: object) => {
     const response = await axiosInstance.get(
       `${PRODUCT_ENDPOINTS.SEARCH}?${params}`
     );
-    return response;
+    return response.data;
   } catch (error) {
     throw error;
   }
@@ -117,7 +117,7 @@ export const getProductsByCategory = async (
     const response = await axiosInstance.get(
       `${PRODUCT_ENDPOINTS.GET_BY_CATEGORY.replace(':categoryId', categoryId)}?${params}`
     );
-    return response;
+    return response.data;
   } catch (error) {
     throw error;
   }
@@ -130,7 +130,7 @@ export const getProductsByCategory = async (
 export const getCategories = async () => {
   try {
     const response = await axiosInstance.get(PRODUCT_ENDPOINTS.GET_CATEGORIES);
-    return response;
+    return response.data;
   } catch (error) {
     throw error;
   }
@@ -152,7 +152,7 @@ export const createProduct = async (productData: FormData) => {
         },
       }
     );
-    return response;
+    return response.data;
   } catch (error) {
     throw error;
   }
@@ -175,7 +175,7 @@ export const updateProduct = async (id: string, productData: FormData) => {
         },
       }
     );
-    return response;
+    return response.data;
   } catch (error) {
     throw error;
   }
@@ -191,7 +191,7 @@ export const deleteProduct = async (id: string) => {
     const response = await axiosInstance.delete(
       PRODUCT_ENDPOINTS.DELETE.replace(':id', id)
     );
-    return response;
+    return response.data;
   } catch (error) {
     throw error;
   }
@@ -209,7 +209,7 @@ export const rateProduct = async (id: string, rating: number) => {
       PRODUCT_ENDPOINTS.RATE_PRODUCT.replace(':id', id),
       { rating }
     );
-    return response;
+    return response.data;
   } catch (error) {
     throw error;
   }
@@ -230,7 +230,7 @@ export const addProductReview = async (
       PRODUCT_ENDPOINTS.ADD_REVIEW.replace(':id', id),
       reviewData
     );
-    return response;
+    return response.data;
   } catch (error) {
     throw error;
   }

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useOrder } from '@/hooks/useOrder';
 import { toast } from 'react-toastify';
+import { formatPrice } from '@/utils/formatPrice';
 
 /**
  * Order History Page Component
@@ -184,7 +185,7 @@ export default function OrderHistoryPage() {
                       {order.items?.length || 0} item(s)
                     </td>
                     <td className="px-6 py-4 text-sm font-semibold text-gray-900">
-                      ${order.total.toFixed(2)}
+                      {formatPrice(order.total)}
                     </td>
                     <td className="px-6 py-4 text-sm">
                       <span

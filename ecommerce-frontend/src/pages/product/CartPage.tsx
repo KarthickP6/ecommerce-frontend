@@ -1,6 +1,9 @@
 import { useEffect } from 'react';
 import { useCart } from '@/hooks/useCart';
 import { toast } from 'react-toastify';
+import { useSelector } from 'react-redux';
+import type { RootState } from '@/app/store';
+import { formatPrice } from '@/utils/formatPrice';
 
 /**
  * CartPage Component
@@ -144,7 +147,7 @@ export default function CartPage() {
                   </div>
                 </td>
                 <td className="p-3 text-center">
-                  ${item.product.price.toFixed(2)}
+                  {formatPrice(item.product.price)}
                 </td>
                 <td className="p-3 text-center">
                   <div className="flex items-center justify-center gap-2">
@@ -188,7 +191,7 @@ export default function CartPage() {
                   </div>
                 </td>
                 <td className="p-3 text-center font-medium">
-                  ${(item.product.price * item.quantity).toFixed(2)}
+                  {formatPrice(item.product.price * item.quantity)}
                 </td>
                 <td className="p-3 text-center">
                   <button
@@ -215,11 +218,11 @@ export default function CartPage() {
             </div>
             <div className="flex justify-between mb-4 pb-4 border-b">
               <span>Subtotal</span>
-              <span>${total.toFixed(2)}</span>
+              <span>{formatPrice(total)}</span>
             </div>
             <div className="flex justify-between text-lg font-bold mb-6">
               <span>Total</span>
-              <span>${total.toFixed(2)}</span>
+              <span>{formatPrice(total)}</span>
             </div>
 
             {/* Action Buttons */}
@@ -251,4 +254,3 @@ export default function CartPage() {
     </div>
   );
 }
-

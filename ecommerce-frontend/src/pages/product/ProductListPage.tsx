@@ -4,6 +4,7 @@ import { getProducts, setPagination, setFilters, getCategories } from '@/feature
 import type { RootState, AppDispatch } from '@/app/store';
 import Pagination from '@/components/common/Pagination';
 import SearchFilter from '@/components/common/SearchFilter';
+import { formatPrice } from '@/utils/formatPrice';
 
 const ProductListPage = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -40,7 +41,7 @@ const ProductListPage = () => {
             <img src={product.image} alt={product.name} className="w-full h-48 object-cover mb-2" />
             <h2 className="text-lg font-semibold">{product.name}</h2>
             <p className="text-gray-600">{product.description}</p>
-            <div className="mt-2 font-bold">${product.price}</div>
+            <div className="mt-2 font-bold">{formatPrice(product.price)}</div>
             <a href={`/products/${product.id}`} className="mt-2 block text-blue-600">View Details</a>
           </div>
         ))}
@@ -55,4 +56,3 @@ const ProductListPage = () => {
 };
 
 export default ProductListPage;
-

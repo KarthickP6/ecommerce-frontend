@@ -3,9 +3,10 @@ import { useSelector } from 'react-redux';
 import type { RootState } from '@/app/store';
 import ProtectedRoute from './ProtectedRoute';
 import AdminRoute from './AdminRoute';
+import UserLayout from '@/components/layout/UserLayout';
 import { LoginPage } from '@/pages/auth/LoginPage';
 import { RegisterPage } from '@/pages/auth/RegisterPage';
-import ProductListPage from '@/pages/product/ProductListPage';
+import ProductListPageNew from '@/pages/product/ProductListPage_New';
 import ProductDetailsPage from '@/pages/product/ProductDetailsPage';
 import CartPage from '@/pages/product/CartPage';
 import CheckoutPage from '@/pages/order/CheckoutPage';
@@ -55,8 +56,22 @@ const AppRoutes = () => {
       <Route path="/" element={<RootRedirect />} />
 
       {/* Public Routes */}
-      <Route path="/products" element={<ProductListPage />} />
-      <Route path="/products/:id" element={<ProductDetailsPage />} />
+      <Route
+        path="/products"
+        element={
+          <UserLayout>
+            <ProductListPageNew />
+          </UserLayout>
+        }
+      />
+      <Route
+        path="/products/:id"
+        element={
+          <UserLayout>
+            <ProductDetailsPage />
+          </UserLayout>
+        }
+      />
       <Route path="/category/:categoryId" element={<CategoryPage />} />
       <Route path="/search" element={<SearchPage />} />
 
@@ -68,16 +83,86 @@ const AppRoutes = () => {
 
       {/* Protected User Routes */}
       <Route element={<ProtectedRoute />}>
-        <Route path="/dashboard" element={<UserDashboardPage />} />
-        <Route path="/profile" element={<ProfilePage />} />
-        <Route path="/address" element={<AddressPage />} />
-        <Route path="/cart" element={<CartPage />} />
-        <Route path="/checkout" element={<CheckoutPage />} />
-        <Route path="/order-success" element={<OrderSuccessPage />} />
-        <Route path="/orders" element={<OrderHistoryPage />} />
-        <Route path="/orders/:orderId" element={<OrderDetailsPage />} />
-        <Route path="/wishlist" element={<WishlistPage />} />
-        <Route path="/review/:productId" element={<ReviewPage />} />
+        <Route
+          path="/dashboard"
+          element={
+            <UserLayout>
+              <UserDashboardPage />
+            </UserLayout>
+          }
+        />
+        <Route
+          path="/profile"
+          element={
+            <UserLayout>
+              <ProfilePage />
+            </UserLayout>
+          }
+        />
+        <Route
+          path="/address"
+          element={
+            <UserLayout>
+              <AddressPage />
+            </UserLayout>
+          }
+        />
+        <Route
+          path="/cart"
+          element={
+            <UserLayout>
+              <CartPage />
+            </UserLayout>
+          }
+        />
+        <Route
+          path="/checkout"
+          element={
+            <UserLayout>
+              <CheckoutPage />
+            </UserLayout>
+          }
+        />
+        <Route
+          path="/order-success"
+          element={
+            <UserLayout>
+              <OrderSuccessPage />
+            </UserLayout>
+          }
+        />
+        <Route
+          path="/orders"
+          element={
+            <UserLayout>
+              <OrderHistoryPage />
+            </UserLayout>
+          }
+        />
+        <Route
+          path="/orders/:orderId"
+          element={
+            <UserLayout>
+              <OrderDetailsPage />
+            </UserLayout>
+          }
+        />
+        <Route
+          path="/wishlist"
+          element={
+            <UserLayout>
+              <WishlistPage />
+            </UserLayout>
+          }
+        />
+        <Route
+          path="/review/:productId"
+          element={
+            <UserLayout>
+              <ReviewPage />
+            </UserLayout>
+          }
+        />
       </Route>
 
       {/* Protected Admin Routes */}

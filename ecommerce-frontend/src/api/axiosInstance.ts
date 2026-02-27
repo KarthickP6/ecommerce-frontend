@@ -6,8 +6,13 @@ import axios from 'axios';
  */
 
 // Get base URL from environment variables
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
+// IMPORTANT: Must use http://localhost:8080/api for backend
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api';
 const API_TIMEOUT = parseInt(import.meta.env.VITE_API_TIMEOUT || '30000', 10);
+
+// Log the API base URL for debugging
+console.log('API Base URL configured:', API_BASE_URL);
+console.log('VITE_API_BASE_URL env:', import.meta.env.VITE_API_BASE_URL);
 
 /**
  * Create Axios Instance

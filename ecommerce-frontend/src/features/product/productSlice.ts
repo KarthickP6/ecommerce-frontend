@@ -17,13 +17,13 @@ export const getCategories = createAsyncThunk(
 
 export const getProducts = createAsyncThunk(
   'product/getProducts',
-  async (params, { rejectWithValue }) => {
+  async (params: { page?: number; limit?: number; search?: string; category?: string }, { rejectWithValue }) => {
     try {
       const response = await productApi.getAllProducts(
-        params.page,
-        params.limit,
-        params.search,
-        params.category
+        params.page || 0,
+        params.limit || 20,
+        params.search || '',
+        params.category || ''
       );
       return response.data;
     } catch (err: any) {
@@ -59,6 +59,7 @@ export interface Product {
 interface ProductState {
   products: Product[];
   selectedProduct: Product | null;
+  categories: any[];
   filters: {
     search: string;
     category: string;
@@ -78,6 +79,7 @@ interface ProductState {
 const initialState: ProductState = {
   products: [],
   selectedProduct: null,
+  categories: [],
   filters: {
     search: '',
     category: '',
@@ -140,6 +142,56 @@ const productSlice = createSlice({
     clearError: (state) => {
       state.error = null;
     },
+  },
+  extraReducers: (builder) => {
+    builder
+      .addCase(getProducts.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(getProducts.fulfilled, (state, action) => {
+        // Backend returns: { success, data: { content: [...], totalElements, totalPages, number, size }, ... }
+        const payload = action.payload;
+
+        // Extract products from content array
+        const content = payload?.content || payload?.data?.content || [];
+        const totalElements = payload?.totalElements || payload?.data?.totalElements || 0;
+
+        state.products = Array.isArray(content) ? content : [];
+        state.pagination.total = totalElements;
+        state.loading = false;
+      })
+      .addCase(getProducts.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      })
+      .addCase(getProductById.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(getProductById.fulfilled, (state, action) => {
+        state.selectedProduct = action.payload;
+        state.loading = false;
+      })
+      .addCase(getProductById.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      })
+      .addCase(getCategories.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(getCategories.fulfilled, (state, action: PayloadAction<any>) => {
+        // Backend returns: { success, data: [...], message, timestamp }
+        // data can be array directly or wrapped in object
+        const payload = action.payload;
+        state.categories = Array.isArray(payload) ? payload : (payload.data || payload || []);
+        state.loading = false;
+      })
+      .addCase(getCategories.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      });
   },
 });
 

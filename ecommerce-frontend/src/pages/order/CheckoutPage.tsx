@@ -5,6 +5,7 @@ import { useOrder } from '@/hooks/useOrder';
 import { useSelector } from 'react-redux';
 import type { RootState } from '@/app/store';
 import { toast } from 'react-toastify';
+import { formatPrice } from '@/utils/formatPrice';
 
 /**
  * Checkout Page Component
@@ -133,7 +134,7 @@ export default function CheckoutPage() {
                       <p className="text-sm text-gray-600">Qty: {item.quantity}</p>
                     </div>
                     <p className="font-semibold">
-                      ${(item.product.price * item.quantity).toFixed(2)}
+                      {formatPrice(item.product.price * item.quantity)}
                     </p>
                   </div>
                 ))}
@@ -141,7 +142,7 @@ export default function CheckoutPage() {
               <div className="mt-4 pt-4 border-t">
                 <div className="flex justify-between text-lg font-bold">
                   <span>Total:</span>
-                  <span>${total.toFixed(2)}</span>
+                  <span>{formatPrice(total)}</span>
                 </div>
               </div>
             </div>
@@ -239,7 +240,7 @@ export default function CheckoutPage() {
               {/* Items Count */}
               <div className="flex justify-between mb-4 pb-4 border-b">
                 <span>Items ({itemCount}):</span>
-                <span>${total.toFixed(2)}</span>
+                <span>{formatPrice(total)}</span>
               </div>
 
               {/* Shipping */}
@@ -251,13 +252,13 @@ export default function CheckoutPage() {
               {/* Tax */}
               <div className="flex justify-between mb-4 pb-4 border-b">
                 <span>Tax:</span>
-                <span>${(total * 0.1).toFixed(2)}</span>
+                <span>{formatPrice(total * 0.1)}</span>
               </div>
 
               {/* Total */}
               <div className="flex justify-between text-lg font-bold mb-6">
                 <span>Total:</span>
-                <span>${(total * 1.1).toFixed(2)}</span>
+                <span>{formatPrice(total * 1.1)}</span>
               </div>
 
               {/* Error Message */}

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { formatPrice } from '@/utils/formatPrice';
 
 /**
  * Enhanced Cart Page with Beautiful UI
@@ -103,7 +104,7 @@ const CartPageNew = () => {
                       <div className="flex-1">
                         <h3 className="text-xl font-bold text-gray-900 mb-2">{item.name}</h3>
                         <p className="text-2xl font-bold text-gray-900 mb-4">
-                          ${item.price.toFixed(2)}
+                          {formatPrice(item.price)}
                         </p>
 
                         {/* Quantity Control */}
@@ -136,7 +137,7 @@ const CartPageNew = () => {
                       {/* Price and Remove */}
                       <div className="text-right">
                         <p className="text-sm text-gray-600 mb-4">
-                          Subtotal: <span className="font-bold text-gray-900">${(item.price * item.quantity).toFixed(2)}</span>
+                          Subtotal: <span className="font-bold text-gray-900">{formatPrice(item.price * item.quantity)}</span>
                         </p>
                         <button
                           onClick={() => handleQuantityChange(item.id, 0)}
@@ -184,19 +185,19 @@ const CartPageNew = () => {
                 <div className="space-y-4 mb-6 pb-6 border-b-2 border-gray-200">
                   <div className="flex justify-between text-gray-700">
                     <span>Subtotal</span>
-                    <span className="font-semibold">${subtotal.toFixed(2)}</span>
+                    <span className="font-semibold">{formatPrice(subtotal)}</span>
                   </div>
 
                   {discountPercent > 0 && (
                     <div className="flex justify-between text-green-600">
                       <span>Discount ({discountPercent}%)</span>
-                      <span className="font-semibold">-${discount.toFixed(2)}</span>
+                      <span className="font-semibold">-{formatPrice(discount)}</span>
                     </div>
                   )}
 
                   <div className="flex justify-between text-gray-700">
                     <span>Tax (10%)</span>
-                    <span className="font-semibold">${tax.toFixed(2)}</span>
+                    <span className="font-semibold">{formatPrice(tax)}</span>
                   </div>
 
                   <div className="flex justify-between text-gray-700">
@@ -208,7 +209,7 @@ const CartPageNew = () => {
                 <div className="mb-6 p-4 bg-gradient-to-r from-blue-50 to-cyan-50 rounded-lg">
                   <div className="flex justify-between items-center">
                     <span className="text-lg font-semibold text-gray-900">Total</span>
-                    <span className="text-3xl font-bold text-blue-600">${total.toFixed(2)}</span>
+                    <span className="text-3xl font-bold text-blue-600">{formatPrice(total)}</span>
                   </div>
                 </div>
 

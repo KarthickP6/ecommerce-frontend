@@ -61,7 +61,8 @@ public class AdminServiceImpl implements AdminService {
     @Override
     @Transactional(readOnly = true)
     public Page<UserResponse> getAllUsers(int page, int limit, String search, String status) {
-        Pageable pageable = PageRequest.of(page - 1, limit);
+        // Page index is 0-based
+        Pageable pageable = PageRequest.of(page, limit);
         Page<User> users;
 
         if (search != null && !search.isEmpty()) {
@@ -101,7 +102,10 @@ public class AdminServiceImpl implements AdminService {
     @Override
     @Transactional(readOnly = true)
     public Page<ProductResponse> getAllProducts(int page, int limit) {
-        Pageable pageable = PageRequest.of(page - 1, limit);
+        // Page comes as 1-indexed from controller, convert to 0-indexed for Spring Data
+        // page=1 -> index=0, page=2 -> index=1, etc.
+        int pageIndex = Math.max(0, page - 1);
+        Pageable pageable = PageRequest.of(pageIndex, limit);
         return productRepository.findAll(pageable)
                 .map(this::mapToProductResponse);
     }
@@ -158,7 +162,8 @@ public class AdminServiceImpl implements AdminService {
     @Override
     @Transactional(readOnly = true)
     public Page<OrderResponse> getAllOrders(int page, int limit) {
-        Pageable pageable = PageRequest.of(page - 1, limit);
+        // Page index is 0-based
+        Pageable pageable = PageRequest.of(page, limit);
         return orderRepository.findAll(pageable)
                 .map(this::mapToOrderResponse);
     }
@@ -189,6 +194,17 @@ public class AdminServiceImpl implements AdminService {
     }
 
     private ProductResponse mapToProductResponse(Product product) {
+        // Map category safely - handle null case
+        com.meenatchi.furniture.dto.response.CategoryResponse categoryResponse = null;
+        if (product.getCategory() != null) {
+            categoryResponse = com.meenatchi.furniture.dto.response.CategoryResponse.builder()
+                    .id(product.getCategory().getId())
+                    .name(product.getCategory().getName())
+                    .description(product.getCategory().getDescription())
+                    .imageUrl(product.getCategory().getImageUrl())
+                    .build();
+        }
+
         return ProductResponse.builder()
                 .id(product.getId())
                 .name(product.getName())
@@ -196,9 +212,10 @@ public class AdminServiceImpl implements AdminService {
                 .price(product.getPrice())
                 .stock(product.getStock())
                 .rating(product.getRating())
-                .images(product.getImages().stream()
+                .category(categoryResponse)
+                .images(product.getImages() != null ? product.getImages().stream()
                         .map(img -> img.getImageUrl())
-                        .collect(Collectors.toSet()))
+                        .collect(Collectors.toSet()) : new java.util.HashSet<>())
                 .createdAt(product.getCreatedAt())
                 .build();
     }

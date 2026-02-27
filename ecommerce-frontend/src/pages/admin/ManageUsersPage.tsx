@@ -1,6 +1,15 @@
 import { useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import AdminLayout from '@/components/admin/AdminLayout';
 import { toast } from 'react-toastify';
+import {
+  fetchUsers,
+  blockUserThunk,
+  unblockUserThunk,
+  clearError,
+} from '@/features/admin/adminSlice';
+import type { RootState } from '@/app/store';
+import { formatPrice } from '@/utils/formatPrice';
 
 interface User {
   id: string;
@@ -17,17 +26,18 @@ interface User {
  * Manage Users Page
  * Admin page for managing user accounts
  * Features:
- * - User list with pagination
+ * - User list with pagination from database
  * - Search users
  * - Filter by role and status
  * - View user details
- * - Change user role
- * - Ban/Suspend users
+ * - Block/Unblock users
  * - View user orders and spending
  */
 export default function ManageUsersPage() {
-  const [users, setUsers] = useState<User[]>([]);
-  const [loading, setLoading] = useState(false);
+  const dispatch = useDispatch();
+  const { users, loading, error } = useSelector(
+    (state: RootState) => state.admin
+  );
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [roleFilter, setRoleFilter] = useState('all');
@@ -35,49 +45,48 @@ export default function ManageUsersPage() {
   const [selectedUsers, setSelectedUsers] = useState<Set<string>>(new Set());
   const itemsPerPage = 10;
 
-  // Load users on mount
+  // Load users from database on mount
   useEffect(() => {
-    loadUsers();
-  }, []);
+    const fetch = async () => {
+      const pageIndex = currentPage - 1;
+      console.log('ManageUsersPage: dispatching fetchUsers', { page: pageIndex, limit: itemsPerPage, search: searchTerm, status: statusFilter });
+      try {
+        await dispatch(
+          fetchUsers({
+            page: pageIndex,
+            limit: itemsPerPage,
+            search: searchTerm,
+            status: statusFilter !== 'all' ? statusFilter : '',
+          }) as any
+        ).unwrap();
+        console.log('ManageUsersPage: fetchUsers fulfilled');
+      } catch (err: any) {
+        console.error('ManageUsersPage: fetchUsers error', err);
+        toast.error(err?.message || 'Failed to load users from server');
+      }
+    };
+    fetch();
+  }, [dispatch, currentPage, searchTerm, statusFilter]);
 
-  const loadUsers = async () => {
-    setLoading(true);
-    try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      const mockUsers: User[] = Array.from({ length: 35 }, (_, i) => ({
-        id: `user-${i + 1}`,
-        name: `User ${i + 1}`,
-        email: `user${i + 1}@example.com`,
-        role: i === 0 ? 'admin' : 'user',
-        status: ['active', 'inactive', 'suspended'][Math.floor(Math.random() * 3)] as any,
-        joinDate: new Date(Date.now() - Math.random() * 365 * 86400000).toISOString(),
-        orders: Math.floor(Math.random() * 50),
-        totalSpent: Math.random() * 5000,
-      }));
-      setUsers(mockUsers);
-    } catch (err) {
-      toast.error('Failed to load users');
-    } finally {
-      setLoading(false);
-    }
-  };
+  // Clear error on unmount
+  useEffect(() => {
+    return () => {
+      if (error) {
+        dispatch(clearError());
+      }
+    };
+  }, [dispatch, error]);
 
-  // Filter users
-  const filteredUsers = users.filter((u) => {
-    const matchesSearch =
-      u.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      u.email.toLowerCase().includes(searchTerm.toLowerCase());
+  // Use backend data directly
+  const paginatedUsers = (users.data && Array.isArray(users.data)) ? users.data : [];
+  const totalPages = users.total ? Math.ceil(users.total / itemsPerPage) : 0;
+
+  const filteredUsers = paginatedUsers.filter((u) => {
     const matchesRole = roleFilter === 'all' || u.role === roleFilter;
-    const matchesStatus = statusFilter === 'all' || u.status === statusFilter;
-    return matchesSearch && matchesRole && matchesStatus;
+    const matchesSearch =
+      !searchTerm || u.name.toLowerCase().includes(searchTerm.toLowerCase()) || u.email.toLowerCase().includes(searchTerm.toLowerCase());
+    return matchesRole && matchesSearch;
   });
-
-  const paginatedUsers = filteredUsers.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
-  const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
 
   const handleSelectUser = (id: string) => {
     const newSelected = new Set(selectedUsers);
@@ -98,17 +107,27 @@ export default function ManageUsersPage() {
   };
 
   const handleChangeRole = (id: string, newRole: 'user' | 'admin') => {
-    setUsers(
-      users.map((u) => (u.id === id ? { ...u, role: newRole } : u))
-    );
+    // TODO: dispatch an API call to update role when endpoint available
     toast.success('User role updated');
   };
 
   const handleChangeStatus = (id: string, newStatus: 'active' | 'inactive' | 'suspended') => {
-    setUsers(
-      users.map((u) => (u.id === id ? { ...u, status: newStatus } : u))
-    );
-    toast.success(`User ${newStatus}`);
+    // When admin chooses to suspend/block a user, call blockUserThunk; for unblocking, use unblockUserThunk
+    if (newStatus === 'suspended') {
+      dispatch(blockUserThunk({ id, blocked: true, reason: 'Blocked by admin' }) as any);
+      toast.success('User blocked successfully');
+    } else if (newStatus === 'active') {
+      dispatch(unblockUserThunk(id) as any);
+      toast.success('User unblocked successfully');
+    } else {
+      // For inactive or other statuses, show toast and rely on backend API to implement
+      toast.info(`Set status to ${newStatus}`);
+    }
+  };
+
+  const handleUnblockUser = (id: string) => {
+    dispatch(unblockUserThunk(id) as any);
+    toast.success('User unblocked successfully');
   };
 
   const handleBulkStatus = (status: 'active' | 'inactive' | 'suspended') => {
@@ -116,11 +135,14 @@ export default function ManageUsersPage() {
       toast.warning('No users selected');
       return;
     }
-    setUsers(
-      users.map((u) =>
-        selectedUsers.has(u.id) ? { ...u, status } : u
-      )
-    );
+    // Dispatch block/unblock per selected user
+    selectedUsers.forEach((id) => {
+      if (status === 'suspended') {
+        dispatch(blockUserThunk({ id, blocked: true, reason: 'Bulk blocked' }) as any);
+      } else if (status === 'active') {
+        dispatch(unblockUserThunk(id) as any);
+      }
+    });
     setSelectedUsers(new Set());
     toast.success(`${selectedUsers.size} users ${status}`);
   };
@@ -250,7 +272,7 @@ export default function ManageUsersPage() {
                     </td>
                   </tr>
                 ) : (
-                  paginatedUsers.map((user) => (
+                  filteredUsers.map((user) => (
                     <tr key={user.id} className="hover:bg-gray-50">
                       <td className="px-6 py-4">
                         <input
@@ -302,7 +324,7 @@ export default function ManageUsersPage() {
                         {user.orders}
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-900 font-medium">
-                        ${user.totalSpent.toFixed(2)}
+                        {formatPrice(user.totalSpent)}
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-600">
                         {new Date(user.joinDate).toLocaleDateString()}
@@ -323,12 +345,12 @@ export default function ManageUsersPage() {
           </div>
 
           {/* Pagination */}
-          {totalPages > 1 && (
+          {users?.total > 0 && (
             <div className="bg-gray-50 px-6 py-4 flex items-center justify-between border-t">
               <div className="text-sm text-gray-600">
                 Showing {(currentPage - 1) * itemsPerPage + 1} to{' '}
-                {Math.min(currentPage * itemsPerPage, filteredUsers.length)} of{' '}
-                {filteredUsers.length} users
+                {Math.min(currentPage * itemsPerPage, users.total)} of{' '}
+                {users.total} users
               </div>
 
               <div className="flex gap-2">

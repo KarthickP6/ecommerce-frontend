@@ -8,9 +8,8 @@ import {
   updateProductThunk,
   clearError,
 } from '@/features/admin/adminSlice';
-import { getCategories } from '@/features/product/productSlice';
 import type { RootState } from '@/app/store';
-import * as productApi from '@/api/productApi';
+import axios from 'axios';
 
 interface FormData {
   name: string;
@@ -20,6 +19,13 @@ interface FormData {
   categoryId: string;
 }
 
+interface Category {
+  id: number;
+  name: string;
+  description: string;
+  imageUrl?: string;
+}
+
 export default function AddEditProductPage() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -27,12 +33,6 @@ export default function AddEditProductPage() {
   const isEdit = !!id;
 
   const { loading, error } = useSelector((state: RootState) => state.admin);
-  const { products: allProducts } = useSelector(
-    (state: RootState) => state.product
-  );
-  const { data: categories } = useSelector(
-    (state: RootState) => state.product.categories || { data: [] }
-  );
 
   const [formData, setFormData] = useState<FormData>({
     name: '',
@@ -43,17 +43,31 @@ export default function AddEditProductPage() {
   });
 
   const [loadingProduct, setLoadingProduct] = useState(false);
-  const [localCategories, setLocalCategories] = useState<any[]>([]);
+  const [loadingCategories, setLoadingCategories] = useState(true);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [pageReady, setPageReady] = useState(false);
 
   // Load categories on mount
   useEffect(() => {
     const loadCategories = async () => {
       try {
-        const response = await productApi.getCategories();
-        setLocalCategories(response.data || []);
+        setLoadingCategories(true);
+        const response = await axios.get('/api/categories');
+        console.log('Categories loaded:', response.data);
+
+        if (response.data && response.data.data) {
+          setCategories(Array.isArray(response.data.data) ? response.data.data : []);
+        } else if (Array.isArray(response.data)) {
+          setCategories(response.data);
+        }
+        setPageReady(true);
       } catch (error) {
         console.error('Failed to load categories:', error);
         toast.error('Failed to load categories');
+        setCategories([]);
+        setPageReady(true);
+      } finally {
+        setLoadingCategories(false);
       }
     };
 
@@ -62,12 +76,12 @@ export default function AddEditProductPage() {
 
   // Load product data if editing
   useEffect(() => {
-    if (isEdit) {
+    if (isEdit && id) {
       const loadProduct = async () => {
         setLoadingProduct(true);
         try {
-          const response = await productApi.getProductById(id);
-          const product = response.data;
+          const response = await axios.get(`/api/products/${id}`);
+          const product = response.data?.data || response.data;
           setFormData({
             name: product.name || '',
             description: product.description || '',
@@ -140,19 +154,36 @@ export default function AddEditProductPage() {
     };
 
     try {
+      // Show loading state
+      let result;
+
       if (isEdit) {
-        await dispatch(
+        result = await dispatch(
           updateProductThunk({ id: id as string, data: productPayload }) as any
         );
-        toast.success('Product updated successfully');
+        if (result?.payload) {
+          toast.success('Product updated successfully!');
+        } else {
+          toast.error('Failed to update product');
+          return;
+        }
       } else {
-        await dispatch(createProductThunk(productPayload) as any);
-        toast.success('Product created successfully');
+        result = await dispatch(createProductThunk(productPayload) as any);
+        if (result?.payload) {
+          toast.success('Product created successfully!');
+        } else {
+          toast.error('Failed to create product');
+          return;
+        }
       }
-      navigate('/admin/products');
+
+      // Small delay to ensure toast is visible before navigation
+      setTimeout(() => {
+        navigate('/admin/products', { replace: true });
+      }, 500);
     } catch (error) {
       console.error('Error saving product:', error);
-      toast.error('Failed to save product');
+      toast.error('Failed to save product: ' + (error instanceof Error ? error.message : 'Unknown error'));
     }
   };
 
@@ -178,15 +209,15 @@ export default function AddEditProductPage() {
           </div>
         )}
 
-        {/* Loading State */}
-        {loadingProduct && (
+        {/* Loading State - Show spinner while loading */}
+        {(loadingProduct || loadingCategories) && (
           <div className="flex items-center justify-center h-64">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
           </div>
         )}
 
-        {/* Form */}
-        {!loadingProduct && (
+        {/* Form - Show only when page is ready and not loading */}
+        {pageReady && !loadingProduct && !loadingCategories && (
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Product Name */}
             <div>
@@ -259,27 +290,33 @@ export default function AddEditProductPage() {
               <label className="block text-sm font-medium text-gray-900 mb-1">
                 Category <span className="text-red-500">*</span>
               </label>
-              <select
-                name="categoryId"
-                value={formData.categoryId}
-                onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                required
-              >
-                <option value="">Select a category</option>
-                {localCategories.map((category) => (
-                  <option key={category.id} value={category.id}>
-                    {category.name}
-                  </option>
-                ))}
-              </select>
+              {categories.length > 0 ? (
+                <select
+                  name="categoryId"
+                  value={formData.categoryId}
+                  onChange={handleChange}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  required
+                >
+                  <option value="">Select a category</option>
+                  {categories.map((category) => (
+                    <option key={category.id} value={category.id}>
+                      {category.name}
+                    </option>
+                  ))}
+                </select>
+              ) : (
+                <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                  <p className="text-yellow-800">No categories available</p>
+                </div>
+              )}
             </div>
 
             {/* Buttons */}
             <div className="flex gap-4 pt-6">
               <button
                 type="submit"
-                disabled={loading || loadingProduct}
+                disabled={loading || loadingProduct || loadingCategories || categories.length === 0}
                 className="flex-1 px-6 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white rounded-lg font-medium transition"
               >
                 {loading ? 'Saving...' : isEdit ? 'Update Product' : 'Create Product'}

@@ -1,6 +1,7 @@
 import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import type { RootState } from '@/app/store';
+import { formatPrice } from '@/utils/formatPrice';
 
 /**
  * User Dashboard Page
@@ -153,7 +154,7 @@ export default function UserDashboardPage() {
             <p className="text-gray-600 text-sm mt-2">Total Orders</p>
           </div>
           <div className="bg-white rounded-lg shadow p-6">
-            <div className="text-3xl font-bold text-green-600">$0.00</div>
+            <div className="text-3xl font-bold text-green-600">{formatPrice(0)}</div>
             <p className="text-gray-600 text-sm mt-2">Total Spent</p>
           </div>
           <div className="bg-white rounded-lg shadow p-6">
@@ -194,4 +195,3 @@ export default function UserDashboardPage() {
     </div>
   );
 }
-

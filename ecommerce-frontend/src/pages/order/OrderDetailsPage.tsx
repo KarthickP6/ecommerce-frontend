@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useOrder } from '@/hooks/useOrder';
 import { toast } from 'react-toastify';
+import { formatPrice } from '@/utils/formatPrice';
 
 /**
  * Order Details Page Component
@@ -216,7 +217,7 @@ export default function OrderDetailsPage() {
                     <div className="text-right">
                       <p className="text-sm text-gray-600">Qty: {item.quantity}</p>
                       <p className="font-semibold text-gray-900">
-                        ${(item.product.price * item.quantity).toFixed(2)}
+                        {formatPrice(item.product.price * item.quantity)}
                       </p>
                     </div>
                   </div>
@@ -231,18 +232,18 @@ export default function OrderDetailsPage() {
                 <div className="flex justify-between">
                   <span className="text-gray-600">Subtotal:</span>
                   <span className="font-semibold text-gray-900">
-                    ${(selectedOrder.total * 0.91).toFixed(2)}
+                    {formatPrice(selectedOrder.total * 0.91)}
                   </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Tax (10%):</span>
                   <span className="font-semibold text-gray-900">
-                    ${(selectedOrder.total * 0.1).toFixed(2)}
+                    {formatPrice(selectedOrder.total * 0.1)}
                   </span>
                 </div>
                 <div className="flex justify-between text-lg font-bold border-t pt-3">
                   <span>Total:</span>
-                  <span className="text-blue-600">${selectedOrder.total.toFixed(2)}</span>
+                  <span className="text-blue-600">{formatPrice(selectedOrder.total)}</span>
                 </div>
               </div>
             </div>

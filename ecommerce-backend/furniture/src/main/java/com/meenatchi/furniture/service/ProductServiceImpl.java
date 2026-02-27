@@ -119,6 +119,17 @@ public class ProductServiceImpl implements ProductService {
     }
 
     private ProductResponse mapToProductResponse(Product product) {
+        // Map category safely - handle null case
+        com.meenatchi.furniture.dto.response.CategoryResponse categoryResponse = null;
+        if (product.getCategory() != null) {
+            categoryResponse = com.meenatchi.furniture.dto.response.CategoryResponse.builder()
+                    .id(product.getCategory().getId())
+                    .name(product.getCategory().getName())
+                    .description(product.getCategory().getDescription())
+                    .imageUrl(product.getCategory().getImageUrl())
+                    .build();
+        }
+
         return ProductResponse.builder()
                 .id(product.getId())
                 .name(product.getName())
@@ -126,15 +137,10 @@ public class ProductServiceImpl implements ProductService {
                 .price(product.getPrice())
                 .stock(product.getStock())
                 .rating(product.getRating())
-                .category(com.meenatchi.furniture.dto.response.CategoryResponse.builder()
-                        .id(product.getCategory().getId())
-                        .name(product.getCategory().getName())
-                        .description(product.getCategory().getDescription())
-                        .imageUrl(product.getCategory().getImageUrl())
-                        .build())
-                .images(product.getImages().stream()
+                .category(categoryResponse)
+                .images(product.getImages() != null ? product.getImages().stream()
                         .map(img -> img.getImageUrl())
-                        .collect(Collectors.toSet()))
+                        .collect(Collectors.toSet()) : new java.util.HashSet<>())
                 .createdAt(product.getCreatedAt())
                 .build();
     }
